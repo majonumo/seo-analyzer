@@ -3,7 +3,7 @@
 // Spec: spec/features/PERFORMANCE_MODULE.md
 
 import * as cheerio from 'cheerio'
-import type { Element } from 'cheerio'
+import type { Element } from 'domhandler'
 import { calculateModuleScore } from '../scoring'
 import type {
   Check,

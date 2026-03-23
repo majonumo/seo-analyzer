@@ -68,7 +68,7 @@ async function detectSitemapUrl(baseUrl: string): Promise<string | null> {
   // 1. Buscar en robots.txt
   const robotsTxt = await safeFetch(`${origin}/robots.txt`)
   if (robotsTxt) {
-    const matches = [...robotsTxt.matchAll(/^Sitemap:\s*(.+)$/gim)]
+    const matches = Array.from(robotsTxt.matchAll(/^Sitemap:\s*(.+)$/gim))
     if (matches.length > 0) return matches[0][1].trim()
   }
 
