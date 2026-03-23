@@ -39,22 +39,43 @@ export async function GET(req: NextRequest) {
     const seen   = new Set<string>()
     const urls:  string[] = []
 
-    // Buscar links en nav, header, y elementos con role="navigation"
-    $('nav a, header nav a, [role="navigation"] a, .nav a, .menu a, .navigation a').each((_, el) => {
-      const href = $(el).attr('href')
-      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return
-      try {
-        const u = new URL(href, baseUrl)
-        // Solo mismo dominio, quitar query params y hash
-        const clean = u.origin + u.pathname.replace(/\/$/, '') || '/'
-        if (u.origin !== origin) return
-        if (seen.has(clean)) return
-        seen.add(clean)
-        urls.push(u.origin + u.pathname)
-      } catch {
-        // ignorar hrefs inválidos
-      }
-    })
+    const collectLinks = (selector: string) => {
+      $(selector).each((_, el) => {
+        const href = $(el).attr('href')
+        if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return
+        try {
+          const u     = new URL(href, baseUrl)
+          const clean = u.origin + u.pathname.replace(/\/$/, '') || '/'
+          if (u.origin !== origin) return
+          if (seen.has(clean)) return
+          seen.add(clean)
+          urls.push(u.origin + u.pathname)
+        } catch { /* ignorar hrefs inválidos */ }
+      })
+    }
+
+    // 1. Prioridad: links dentro del <header> (menú principal)
+    collectLinks('header nav a, header [role="navigation"] a, header a[href]')
+
+    // 2. Si el header no tiene suficientes links, usar solo el PRIMER <nav>
+    //    (casi siempre es el menú principal, no footer ni sidebar)
+    if (urls.length < 2) {
+      seen.clear()
+      urls.length = 0
+      const firstNav = $('nav').first()
+      firstNav.find('a').each((_, el) => {
+        const href = $(el).attr('href')
+        if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return
+        try {
+          const u     = new URL(href, baseUrl)
+          const clean = u.origin + u.pathname.replace(/\/$/, '') || '/'
+          if (u.origin !== origin) return
+          if (seen.has(clean)) return
+          seen.add(clean)
+          urls.push(u.origin + u.pathname)
+        } catch { /* ignorar */ }
+      })
+    }
 
     // Incluir la home si no está
     const home = origin + '/'

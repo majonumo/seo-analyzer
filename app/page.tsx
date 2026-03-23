@@ -1078,17 +1078,20 @@ export default function HomePage() {
             {activeTab === 'seo' && (
               <PagesTable results={sortedResults} category="seo" sortBy="seoScore" />
             )}
-            {activeTab === 'lighthouse' && navUrls.length > 0 && (
-              <LighthouseNavSection navUrls={navUrls} onResults={setLighthouseNavResults} />
-            )}
-            {activeTab === 'lighthouse' && navUrls.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-24 text-center animate-slide-up">
-                <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
-                  <Gauge className="w-7 h-7 text-amber-400" />
-                </div>
-                <p className="text-zinc-400 text-sm">No se detectaron páginas de navegación para ejecutar Lighthouse.</p>
-              </div>
-            )}
+            {/* Lighthouse — siempre montado para preservar estado al cambiar de pestaña */}
+            <div className={activeTab === 'lighthouse' ? '' : 'hidden'}>
+              {navUrls.length > 0
+                ? <LighthouseNavSection navUrls={navUrls} onResults={setLighthouseNavResults} />
+                : (
+                  <div className="flex flex-col items-center justify-center py-24 text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
+                      <Gauge className="w-7 h-7 text-amber-400" />
+                    </div>
+                    <p className="text-zinc-400 text-sm">No se detectaron páginas de navegación para ejecutar Lighthouse.</p>
+                  </div>
+                )
+              }
+            </div>
             {activeTab === 'sitemap' && (
               <SitemapTab sitemapData={sitemapData} auditUrls={auditUrls} />
             )}
