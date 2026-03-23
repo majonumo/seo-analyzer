@@ -42,8 +42,9 @@ export default function ProjectsPage() {
     setError('')
     try {
       const res = await fetch('/api/projects')
-      if (!res.ok) throw new Error('Error al cargar proyectos')
-      setProjects(await res.json())
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error ?? `HTTP ${res.status}`)
+      setProjects(json)
     } catch (e) {
       setError((e as Error).message)
     } finally {
