@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design system tokens ─────────────────────────────────────────────────── */
+:root {
+  --color-critical: #EF4444;
+  --color-warning:  #F59E0B;
+  --color-success:  #10B981;
+  --color-info:     #6366F1;
+
+  --bg-base:    #0A0A0A;
+  --bg-surface: #111111;
+  --bg-raised:  #1A1A1A;
+  --border:     #2A2A2A;
+  --text-1:     #FAFAFA;
+  --text-2:     #A1A1AA;
+  --text-3:     #52525B;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-1);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Score ring animation ─────────────────────────────────────────────────── */
+.score-ring-track {
+  stroke: var(--border);
+}
+
+.score-ring-fill {
+  transition: stroke-dashoffset 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* ── Scrollbar personalizado ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3A3A3A;
+}
+
+/* ── Utilities ────────────────────────────────────────────────────────────── */
+@layer utilities {
+  .border-base {
+    border-color: var(--border);
+  }
+
+  .bg-surface {
+    background-color: var(--bg-surface);
+  }
+
+  .bg-raised {
+    background-color: var(--bg-raised);
+  }
+
+  .text-muted {
+    color: var(--text-2);
+  }
+
+  .text-faint {
+    color: var(--text-3);
+  }
+}
