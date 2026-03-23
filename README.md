@@ -73,3 +73,4 @@ npx vercel
 npm run build
 npm start
 ```
+# seo-analyzer
