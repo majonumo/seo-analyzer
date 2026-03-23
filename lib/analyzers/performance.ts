@@ -3,6 +3,7 @@
 // Spec: spec/features/PERFORMANCE_MODULE.md
 
 import * as cheerio from 'cheerio'
+import type { Element } from 'cheerio'
 import { calculateModuleScore } from '../scoring'
 import type {
   Check,
@@ -98,7 +99,7 @@ export function analyzePerformance(
   const allHeadScripts: ScriptInfo[] = []
 
   $('head script[src]').each((_, el) => {
-    const attribs   = (el as cheerio.Element & { attribs: Record<string, string> }).attribs
+    const attribs   = (el as Element & { attribs: Record<string, string> }).attribs
     const src       = attribs['src'] ?? ''
     const isBlocking = !('async' in attribs) && !('defer' in attribs)
     allHeadScripts.push({ src, isBlocking })
@@ -139,7 +140,7 @@ export function analyzePerformance(
   const allImages: ImageInfo[] = []
 
   $('img').each((_, el) => {
-    const attribs  = (el as cheerio.Element & { attribs: Record<string, string> }).attribs
+    const attribs  = (el as Element & { attribs: Record<string, string> }).attribs
     const src      = attribs['src'] ?? attribs['data-src'] ?? ''
     const alt      = attribs['alt']
     const hasAlt   = alt !== undefined
