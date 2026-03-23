@@ -11,6 +11,7 @@ import {
   Search, Globe, Loader2, AlertTriangle, CheckCircle2, XCircle,
   Sparkles, ChevronDown, ChevronUp, ChevronRight,
   Monitor, Smartphone, Gauge, FileText, RotateCcw,
+  Save, FolderOpen, Check,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -748,6 +749,8 @@ export default function HomePage() {
   const [lighthouseNavResults, setLighthouseNavResults] = useState<LighthousePageResult[]>([])
 
   const [activeTab, setActiveTab] = useState<AuditTab>('dashboard')
+  const [saving, setSaving]       = useState(false)
+  const [savedId, setSavedId]     = useState<string | null>(null)
 
   const activeDomain = auditUrls[0] ? getDomain(auditUrls[0]) : ''
   const totalUrls    = auditUrls.length
@@ -813,8 +816,39 @@ export default function HomePage() {
     setStep('results')
   }
 
+  async function handleSave() {
+    if (saving || savedId) return
+    setSaving(true)
+    try {
+      const res = await fetch('/api/projects', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain:             activeDomain,
+          avg_score:          avgScore,
+          avg_seo:            avgSeo,
+          avg_perf:           avgPerf,
+          total_pages:        results.length,
+          completed_at:       completedAt,
+          sitemap_url:        sitemapData?.sitemapUrl ?? null,
+          audit_urls:         auditUrls,
+          nav_urls:           navUrls,
+          results,
+          lighthouse_results: lighthouseNavResults
+            .filter(r => r.mobile?.available)
+            .map(r => ({ ...r.mobile, url: r.url, desktop: r.desktop })),
+        }),
+      })
+      const data = await res.json()
+      if (data.id) setSavedId(data.id)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   function handleReset() {
     setStep('input')
+    setSavedId(null)
     setResults([])
     setSitemapData(null)
     setAuditUrls([])
@@ -858,6 +892,27 @@ export default function HomePage() {
               </button>
             </form>
           )}
+
+          {/* Botón guardar + link proyectos (solo en results) */}
+          {step === 'results' && (
+            <div className="flex items-center gap-2 ml-auto flex-shrink-0">
+              <a href="/projects" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 text-xs transition-colors">
+                <FolderOpen className="w-3.5 h-3.5" /> Proyectos
+              </a>
+              {savedId ? (
+                <a href={`/projects/${savedId}`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-xs font-medium transition-colors hover:bg-emerald-500/30">
+                  <Check className="w-3.5 h-3.5" /> Guardado
+                </a>
+              ) : (
+                <button onClick={handleSave} disabled={saving}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-xs font-medium disabled:opacity-50 transition-colors">
+                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  {saving ? 'Guardando...' : 'Guardar'}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
@@ -893,10 +948,15 @@ export default function HomePage() {
               </div>
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">Site Audit</h1>
               <p className="text-zinc-400 text-base mb-6 max-w-lg">Auditá todas las páginas de tu sitio — SEO, Performance y Lighthouse en páginas principales</p>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-400 mb-10">
+              <div className="flex items-center gap-4 mb-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 Sin costo · hasta 100 páginas · Lighthouse solo en navegación
               </div>
+              <a href="/projects" className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-zinc-700 bg-zinc-800/50 text-xs text-zinc-400 hover:text-zinc-200 hover:border-zinc-600 transition-colors">
+                <FolderOpen className="w-3 h-3" /> Mis proyectos
+              </a>
+            </div>
               <form onSubmit={handleDetect} className="w-full max-w-2xl">
                 <div className="flex gap-3">
                   <div className="flex-1 relative">
