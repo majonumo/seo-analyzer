@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npx tsc:*)",
       "Bash(npx kill-port:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(cmd /c \"wmic process where ProcessId=22456 get Name,ProcessId\")",
+      "Bash(cmd /c \"wmic process where ProcessId=22456 delete\")"
     ]
   }
 }
