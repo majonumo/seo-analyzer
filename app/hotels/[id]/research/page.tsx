@@ -6,7 +6,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import {
   Loader2, Plus, Trash2, FileText, ChevronRight,
-  ArrowLeft, X, BookOpen,
+  ArrowLeft, X, BookOpen, Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
@@ -49,13 +49,28 @@ function NewReportForm({ hotelId, onClose, onCreated }: {
   hotelId: string; onClose: () => void; onCreated: (r: ListItem) => void
 }) {
   const [form, setForm] = useState({
-    type: 'market_analysis' as ReportType, title: '', destination: '', content: '',
+    type: 'market_analysis' as ReportType, title: '', destination: '', content: '', extraContext: '',
   })
-  const [saving, setSaving] = useState(false)
-  const [error, setError]   = useState('')
+  const [saving, setSaving]       = useState(false)
+  const [generating, setGenerating] = useState(false)
+  const [error, setError]         = useState('')
 
   function loadTemplate(type: ReportType) {
     setForm(p => ({ ...p, type, content: PROMPT_TEMPLATES[type] }))
+  }
+
+  async function handleGenerate() {
+    setGenerating(true); setError('')
+    try {
+      const res = await fetch(`/api/hotels/${hotelId}/research/generate`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: form.type, destination: form.destination || undefined, extraContext: form.extraContext || undefined }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json?.error ?? `HTTP ${res.status}`)
+      setForm(p => ({ ...p, content: json.content }))
+    } catch (e) { setError((e as Error).message) }
+    setGenerating(false)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -103,18 +118,45 @@ function NewReportForm({ hotelId, onClose, onCreated }: {
             <input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
               required placeholder="Análisis de mercado Q2 2026" className={inputCls} />
           </div>
+
+          {/* Gemini generate section */}
+          <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4 space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Sparkles className="w-4 h-4 text-violet-400" />
+              <span className="text-xs font-semibold text-violet-400">Generar con Gemini AI</span>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-zinc-400 mb-1.5">Contexto adicional para la IA (opcional)</label>
+              <textarea
+                value={form.extraContext}
+                onChange={e => setForm(p => ({ ...p, extraContext: e.target.value }))}
+                rows={2}
+                placeholder="Ej: hotel de 40 habitaciones, segmento luxury, ADR $350, competidores principales son X e Y..."
+                className={cn(inputCls, 'resize-none text-xs')}
+              />
+            </div>
+            <button type="button" onClick={handleGenerate} disabled={generating}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-500 hover:bg-violet-400 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
+              {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              {generating ? 'Generando reporte...' : 'Generar con IA'}
+            </button>
+          </div>
+
           <div>
-            <label className="block text-xs font-medium text-zinc-400 mb-1.5">Contenido * <span className="text-zinc-600">(Markdown)</span></label>
+            <label className="block text-xs font-medium text-zinc-400 mb-1.5">
+              Contenido * <span className="text-zinc-600">(Markdown — editá el resultado de la IA o escribe manualmente)</span>
+            </label>
             <textarea value={form.content} onChange={e => setForm(p => ({ ...p, content: e.target.value }))}
-              required rows={12} placeholder="Escribe el reporte en Markdown..."
+              required rows={14} placeholder="El reporte generado por IA aparecerá aquí. También podés escribir directamente."
               className={cn(inputCls, 'resize-y font-mono text-xs leading-relaxed')} />
           </div>
+
           {error && <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{error}</p>}
           <div className="flex gap-3">
-            <button type="submit" disabled={saving}
+            <button type="submit" disabled={saving || !form.content}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 text-sm font-semibold transition-colors">
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-              Guardar
+              Guardar reporte
             </button>
             <button type="button" onClick={onClose}
               className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors">

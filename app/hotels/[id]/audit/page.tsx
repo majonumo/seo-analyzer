@@ -314,16 +314,22 @@ export default function HotelAuditPage({ params }: { params: { id: string } }) {
       setRunState('crawling')
       setProgress({ total: urls.length, done: 0, current: urls[0] ?? '', errors: 0 })
 
-      // 3. Analizar hreflang de la URL principal
-      let hreflangIssues: { type: string; severity: 'critical'|'high'|'low'; description: string; recommendation: string }[] = []
-      try {
-        const hRes = await fetch('/api/site-audit/hreflang', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+      // 3. Analizar hreflang + sitemap en paralelo
+      type MetaIssue = { type: string; severity: 'critical'|'high'|'low'; description: string; recommendation: string }
+      let hreflangIssues: MetaIssue[] = []
+      let sitemapIssues:  MetaIssue[] = []
+
+      await Promise.all([
+        fetch('/api/site-audit/hreflang', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url: hotelUrl }),
-        })
-        if (hRes.ok) hreflangIssues = (await hRes.json()).issues ?? []
-      } catch { /* no-op */ }
+        }).then(r => r.ok ? r.json() : { issues: [] }).then((d: { issues?: MetaIssue[] }) => { hreflangIssues = d.issues ?? [] }).catch(() => {}),
+
+        fetch('/api/site-audit/sitemap-check', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: hotelUrl }),
+        }).then(r => r.ok ? r.json() : { issues: [] }).then((d: { issues?: MetaIssue[] }) => { sitemapIssues = d.issues ?? [] }).catch(() => {}),
+      ])
 
       // 4. Crawl página por página (max concurrencia 3)
       const pageResults: { url: string; issues: PageAuditResult['issues'] }[] = []
@@ -360,7 +366,7 @@ export default function HotelAuditPage({ params }: { params: { id: string } }) {
       await fetch(`/api/audit/${auditId}/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hotelId: id, pageResults, hreflangIssues, mainUrl: hotelUrl }),
+        body: JSON.stringify({ hotelId: id, pageResults, hreflangIssues: [...hreflangIssues, ...sitemapIssues], mainUrl: hotelUrl }),
       })
 
       // 6. Recargar datos
