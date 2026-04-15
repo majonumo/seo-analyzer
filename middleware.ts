@@ -31,12 +31,22 @@ export async function middleware(request: NextRequest) {
   const publicPaths = ['/login', '/register', '/auth/callback']
   const isPublic = publicPaths.some(p => pathname.startsWith(p))
 
-  // Si no está autenticado y trata de acceder al dashboard → redirigir a login
-  if (!user && !isPublic && (pathname.startsWith('/hotels') || pathname.startsWith('/reports'))) {
+  // Rutas protegidas — requieren login
+  const isProtected =
+    pathname === '/' ||
+    pathname.startsWith('/hotels') ||
+    pathname.startsWith('/reports') ||
+    pathname.startsWith('/settings') ||
+    pathname.startsWith('/projects') ||
+    pathname.startsWith('/site-audit') ||
+    pathname.startsWith('/result')
+
+  // Si no está autenticado y trata de acceder a ruta protegida → login
+  if (!user && !isPublic && isProtected) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Si ya está autenticado y va a login → redirigir a hotels
+  // Si ya está autenticado y va a login/register → redirigir a hotels
   if (user && isPublic) {
     return NextResponse.redirect(new URL('/hotels', request.url))
   }
@@ -45,5 +55,18 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/hotels/:path*', '/reports/:path*', '/reports', '/login', '/register'],
+  matcher: [
+    '/',
+    '/hotels/:path*',
+    '/reports/:path*',
+    '/reports',
+    '/settings/:path*',
+    '/settings',
+    '/projects/:path*',
+    '/projects',
+    '/site-audit/:path*',
+    '/result/:path*',
+    '/login',
+    '/register',
+  ],
 }
