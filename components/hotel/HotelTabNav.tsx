@@ -7,11 +7,12 @@ import { ArrowLeft, Globe } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const TABS = [
-  { label: 'Overview',       path: '',            exact: true },
+  { label: 'Overview',       path: '',             exact: true },
   { label: 'Auditoría',      path: '/audit' },
   { label: 'Keywords',       path: '/keywords' },
   { label: 'Competidores',   path: '/competitors' },
   { label: 'Investigación',  path: '/research' },
+  { label: 'Configuración',  path: '/settings' },
 ]
 
 interface Props {
