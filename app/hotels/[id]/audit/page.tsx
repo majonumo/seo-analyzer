@@ -79,7 +79,7 @@ function ScoreGauge({ score }: { score: number | null }) {
     : 'border-red-500/30 bg-red-500/5'
   return (
     <div className={cn('flex flex-col items-center justify-center w-32 h-32 rounded-2xl border-2', ring)}>
-      <span className={cn('text-4xl font-black tabular-nums', color)}>{score ?? '—'}</span>
+      <span className={cn('text-4xl font-black tabular-nums', color)}>{score !== null ? score : '—'}</span>
       <span className="text-xs text-zinc-500 mt-1">SEO Score</span>
     </div>
   )
@@ -302,10 +302,14 @@ export default function HotelAuditPage({ params }: { params: { id: string } }) {
       })
       const { auditId } = await startRes.json()
 
-      // 2. Obtener URLs del sitemap
+      // 2. Obtener URLs del sitemap (deduplicadas)
       const urlsRes = await fetch(`/api/site-audit/urls?url=${encodeURIComponent(hotelUrl)}`)
       const urlsData = await urlsRes.json()
-      const urls: string[] = urlsData.found ? urlsData.urls : [hotelUrl]
+      const rawUrls: string[] = urlsData.found ? urlsData.urls : [hotelUrl]
+      // Deduplicar: normalizar quitando trailing slash y hash, luego unique
+      const urls = Array.from(new Set(
+        rawUrls.map(u => u.replace(/#.*$/, '').replace(/\/$/, '') || u)
+      )).slice(0, 50)
 
       setRunState('crawling')
       setProgress({ total: urls.length, done: 0, current: urls[0] ?? '', errors: 0 })

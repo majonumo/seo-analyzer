@@ -84,16 +84,25 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     })
   }
 
-  // ── 2. Guardar issues en batch ─────────────────────────────────────────────
-  if (issuesToInsert.length > 0) {
-    const { error: insertErr } = await supabase.from('issues').insert(issuesToInsert)
+  // ── 2. Deduplicar issues (mismo type + url no se guarda dos veces) ──────────
+  const seen = new Set<string>()
+  const dedupedIssues = issuesToInsert.filter(i => {
+    const key = `${i.type}::${i.url}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+
+  // ── 3. Guardar issues en batch ─────────────────────────────────────────────
+  if (dedupedIssues.length > 0) {
+    const { error: insertErr } = await supabase.from('issues').insert(dedupedIssues)
     if (insertErr) return NextResponse.json({ error: insertErr.message }, { status: 500 })
   }
 
-  // ── 3. Calcular conteos y score ────────────────────────────────────────────
-  const critical = issuesToInsert.filter(i => i.severity === 'critical').length
-  const high     = issuesToInsert.filter(i => i.severity === 'high').length
-  const low      = issuesToInsert.filter(i => i.severity === 'low').length
+  // ── 4. Calcular conteos y score (sobre issues deduplicados) ────────────────
+  const critical = dedupedIssues.filter(i => i.severity === 'critical').length
+  const high     = dedupedIssues.filter(i => i.severity === 'high').length
+  const low      = dedupedIssues.filter(i => i.severity === 'low').length
   const score    = calcScore(critical, high, low)
 
   // ── 4. Actualizar registro de auditoría ────────────────────────────────────
