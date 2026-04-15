@@ -1,13 +1,19 @@
 'use client'
-// app/hotels/[id]/keywords/page.tsx — rankings GSC + quick wins
+// app/hotels/[id]/keywords/page.tsx — rankings GSC + quick wins + position chart
 
 import { use, useEffect, useState } from 'react'
 import {
   Loader2, RefreshCw, TrendingUp, AlertTriangle,
-  Download, Search, Info,
+  Download, Search, Info, X,
 } from 'lucide-react'
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, ReferenceLine,
+} from 'recharts'
 import { cn } from '@/lib/utils'
 import { HotelTabNav } from '@/components/hotel/HotelTabNav'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import type { Keyword } from '@/lib/supabase'
 
 interface HotelInfo { name: string; url: string; country: string; gsc_property: string | null }
@@ -45,9 +51,10 @@ export default function KeywordsPage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading]   = useState(true)
   const [syncing, setSyncing]   = useState(false)
   const [syncMsg, setSyncMsg]   = useState('')
-  const [tab, setTab]           = useState<KwTab>('all')
-  const [days, setDays]         = useState<DayOpt>(90)
-  const [search, setSearch]     = useState('')
+  const [tab, setTab]             = useState<KwTab>('all')
+  const [days, setDays]           = useState<DayOpt>(90)
+  const [search, setSearch]       = useState('')
+  const [selectedKw, setSelectedKw] = useState<string | null>(null)
 
   useEffect(() => { init() }, [id])
   useEffect(() => { loadKeywords() }, [tab, days])
@@ -186,6 +193,54 @@ export default function KeywordsPage({ params }: { params: Promise<{ id: string 
         </div>
       )}
 
+      {/* Position chart for selected keyword */}
+      {selectedKw && (() => {
+        const kwHistory = keywords
+          .filter(k => k.keyword === selectedKw && k.position != null)
+          .sort((a, b) => a.date.localeCompare(b.date))
+          .map(k => ({
+            date: format(new Date(k.date), 'd MMM', { locale: es }),
+            pos:  Number(k.position?.toFixed(1)),
+          }))
+        return (
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5 mb-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-sm font-semibold text-zinc-100 truncate max-w-xs">{selectedKw}</p>
+                <p className="text-xs text-zinc-500 mt-0.5">Evolución de posición — últimos {days}d</p>
+              </div>
+              <button onClick={() => setSelectedKw(null)} className="text-zinc-500 hover:text-zinc-300">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            {kwHistory.length < 2 ? (
+              <p className="text-xs text-zinc-600 py-4 text-center">
+                Se necesitan al menos 2 registros históricos para mostrar el gráfico.
+                Sincronizá GSC en diferentes fechas para ver la evolución.
+              </p>
+            ) : (
+              <div className="h-44">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={kwHistory} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                    <XAxis dataKey="date" tick={{ fill: '#71717a', fontSize: 10 }} />
+                    {/* Invertido: posición 1 arriba, 20 abajo */}
+                    <YAxis reversed tick={{ fill: '#71717a', fontSize: 10 }} domain={['dataMin - 1', 'dataMax + 1']} />
+                    <Tooltip
+                      contentStyle={{ background: '#18181b', border: '1px solid #3f3f46', borderRadius: 8, fontSize: 12 }}
+                      labelStyle={{ color: '#a1a1aa' }} itemStyle={{ color: '#34d399' }}
+                      formatter={(v) => [`#${v}`, 'Posición']}
+                    />
+                    <ReferenceLine y={10} stroke="#3f3f46" strokeDasharray="4 2" label={{ value: 'Top 10', fill: '#52525b', fontSize: 10 }} />
+                    <Line type="monotone" dataKey="pos" stroke="#34d399" strokeWidth={2} dot={{ r: 3, fill: '#34d399' }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        )
+      })()}
+
       {/* Table */}
       {loading ? (
         <div className="flex justify-center py-16"><Loader2 className="w-5 h-5 text-zinc-500 animate-spin" /></div>
@@ -201,6 +256,9 @@ export default function KeywordsPage({ params }: { params: Promise<{ id: string 
         </div>
       ) : (
         <div className="rounded-xl border border-zinc-800 bg-zinc-900 overflow-hidden">
+          <div className="px-4 py-2 border-b border-zinc-800">
+            <p className="text-xs text-zinc-600">Hacé clic en una keyword para ver su evolución de posición</p>
+          </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-800">
@@ -214,7 +272,12 @@ export default function KeywordsPage({ params }: { params: Promise<{ id: string 
             </thead>
             <tbody>
               {filtered.slice(0, 200).map(k => (
-                <tr key={k.id} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/30 transition-colors">
+                <tr key={k.id}
+                  onClick={() => setSelectedKw(prev => prev === k.keyword ? null : k.keyword)}
+                  className={cn(
+                    'border-b border-zinc-800/50 last:border-0 cursor-pointer transition-colors',
+                    selectedKw === k.keyword ? 'bg-emerald-500/5 border-l-2 border-l-emerald-500' : 'hover:bg-zinc-800/30',
+                  )}>
                   <td className="px-4 py-2.5 text-zinc-300 font-medium max-w-xs truncate">{k.keyword}</td>
                   <td className="px-3 py-2.5 text-center"><PosBadge pos={k.position} /></td>
                   <td className="px-3 py-2.5 text-center text-zinc-400 tabular-nums">{k.clicks.toLocaleString()}</td>
