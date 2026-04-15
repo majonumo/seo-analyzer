@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
   const isPublic = publicPaths.some(p => pathname.startsWith(p))
 
   // Si no está autenticado y trata de acceder al dashboard → redirigir a login
-  if (!user && !isPublic && pathname.startsWith('/hotels')) {
+  if (!user && !isPublic && (pathname.startsWith('/hotels') || pathname.startsWith('/reports'))) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
@@ -45,5 +45,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/hotels/:path*', '/login', '/register'],
+  matcher: ['/hotels/:path*', '/reports/:path*', '/reports', '/login', '/register'],
 }

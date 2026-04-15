@@ -7,6 +7,7 @@ import {
   ArrowLeft, Play, Loader2, CheckCircle2, XCircle, AlertTriangle,
   ChevronDown, ChevronUp, ExternalLink, Wrench, Filter, RotateCcw,
 } from 'lucide-react'
+import { HotelTabNav } from '@/components/hotel/HotelTabNav'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts'
@@ -238,15 +239,16 @@ export default function HotelAuditPage({ params }: { params: Promise<{ id: strin
   const [fixFilter, setFixFilter]   = useState<FixFilter>('pending')
   const [typeFilter, setTypeFilter] = useState('all')
   const [hotelUrl, setHotelUrl]     = useState('')
+  const [hotel, setHotel]           = useState<{ name: string; url: string; country: string } | null>(null)
 
   useEffect(() => { init() }, [id])
 
   async function init() {
-    // Load hotel URL
     const r = await fetch(`/api/hotels/${id}`)
     if (r.ok) {
       const h = await r.json()
       setHotelUrl(h.url)
+      setHotel({ name: h.name, url: h.url, country: h.country })
     }
     await loadAudits()
   }
@@ -387,14 +389,11 @@ export default function HotelAuditPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      {/* Header */}
+      {hotel && <HotelTabNav hotelId={id} hotelName={hotel.name} hotelUrl={hotel.url} country={hotel.country} />}
+      {/* Run button row */}
       <div className="flex items-center gap-3">
-        <Link href={`/hotels/${id}`} className="text-zinc-500 hover:text-zinc-300 transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-        </Link>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-zinc-100">Auditoría SEO</h1>
-          {hotelUrl && <p className="text-xs text-zinc-500 mt-0.5">{hotelUrl}</p>}
+          <h2 className="text-lg font-bold text-zinc-100">Auditoría SEO</h2>
         </div>
         <button
           onClick={runAudit}
