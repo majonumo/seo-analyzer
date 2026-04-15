@@ -1,7 +1,7 @@
 'use client'
 // app/hotels/[id]/keywords/page.tsx — rankings GSC + quick wins + position chart
 
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Loader2, RefreshCw, TrendingUp, AlertTriangle,
   Download, Search, Info, X,
@@ -44,8 +44,8 @@ function exportCSV(keywords: Keyword[], filename: string) {
   URL.revokeObjectURL(url)
 }
 
-export default function KeywordsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+export default function KeywordsPage({ params }: { params: { id: string } }) {
+  const { id } = params
   const [hotel, setHotel]       = useState<HotelInfo | null>(null)
   const [keywords, setKeywords] = useState<Keyword[]>([])
   const [loading, setLoading]   = useState(true)

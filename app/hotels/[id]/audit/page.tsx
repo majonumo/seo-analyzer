@@ -1,7 +1,7 @@
 'use client'
 // app/hotels/[id]/audit/page.tsx — Auditoría SEO multi-página con progreso en tiempo real
 
-import { use, useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import {
   ArrowLeft, Play, Loader2, CheckCircle2, XCircle, AlertTriangle,
@@ -220,8 +220,8 @@ function ScoreChart({ audits }: { audits: Audit[] }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function HotelAuditPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+export default function HotelAuditPage({ params }: { params: { id: string } }) {
+  const { id } = params
 
   // Audit runner state
   const [runState, setRunState] = useState<RunState>('idle')

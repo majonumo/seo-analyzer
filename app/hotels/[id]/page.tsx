@@ -1,7 +1,7 @@
 'use client'
 // app/hotels/[id]/page.tsx — overview del hotel
 
-import { useEffect, useState, use } from 'react'
+import { useEffect, useState} from 'react'
 import Link from 'next/link'
 import {
   Loader2, AlertTriangle, BarChart3, Search,
@@ -35,8 +35,8 @@ function DeltaIcon({ impact }: { impact: string | null }) {
   return <Minus className="w-3.5 h-3.5 text-zinc-500" />
 }
 
-export default function HotelDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+export default function HotelDetailPage({ params }: { params: { id: string } }) {
+  const { id } = params
   const [hotel, setHotel]     = useState<HotelDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [audits, setAudits]   = useState<Audit[]>([])

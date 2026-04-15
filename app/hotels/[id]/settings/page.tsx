@@ -1,7 +1,7 @@
 'use client'
 // app/hotels/[id]/settings/page.tsx — editar datos del hotel
 
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Save, Trash2, AlertTriangle } from 'lucide-react'
 import { HotelTabNav } from '@/components/hotel/HotelTabNav'
@@ -30,8 +30,8 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
   )
 }
 
-export default function HotelSettingsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id }    = use(params)
+export default function HotelSettingsPage({ params }: { params: { id: string } }) {
+  const { id } = params
   const router    = useRouter()
   const [hotel, setHotel]     = useState<Hotel | null>(null)
   const [loading, setLoading] = useState(true)

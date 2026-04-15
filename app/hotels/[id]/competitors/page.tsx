@@ -1,7 +1,7 @@
 'use client'
 // app/hotels/[id]/competitors/page.tsx — competidores OTA + historial de precios
 
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Loader2, Plus, Trash2, Globe, ExternalLink, X,
   DollarSign, ChevronDown, ChevronUp, TrendingUp, TrendingDown,
@@ -319,8 +319,8 @@ function CompetitorCard({ competitor, hotelId, myLatestPrice, onDelete, onPriceA
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function CompetitorsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+export default function CompetitorsPage({ params }: { params: { id: string } }) {
+  const { id } = params
   const [hotel, setHotel]             = useState<HotelInfo | null>(null)
   const [competitors, setCompetitors] = useState<CompetitorWithPrices[]>([])
   const [loading, setLoading]         = useState(true)

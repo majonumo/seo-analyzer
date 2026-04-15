@@ -1,7 +1,7 @@
 'use client'
 // app/hotels/[id]/research/page.tsx — reportes de investigación con markdown
 
-import { use, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import {
@@ -190,8 +190,8 @@ function ReportViewer({ hotelId, reportId, onClose, onDeleted }: {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
-export default function ResearchPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
+export default function ResearchPage({ params }: { params: { id: string } }) {
+  const { id } = params
   const [hotel, setHotel]       = useState<HotelInfo | null>(null)
   const [reports, setReports]   = useState<ListItem[]>([])
   const [loading, setLoading]   = useState(true)
