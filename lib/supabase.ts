@@ -1,12 +1,13 @@
 // lib/supabase.ts — cliente Supabase singleton (browser / API routes sin cookies)
 
 import { createClient } from '@supabase/supabase-js'
+import type { PageAuditResult, LighthouseResult } from './types'
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL
 const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 if (!url || !key) {
-  console.warn('[Supabase] Faltan NEXT_PUBLIC_SUPABASE_URL o NEXT_PUBLIC_SUPABASE_ANON_KEY en .env.local')
+  throw new Error('Faltan NEXT_PUBLIC_SUPABASE_URL o NEXT_PUBLIC_SUPABASE_ANON_KEY en .env.local')
 }
 
 export const supabase = createClient(url ?? '', key ?? '')
@@ -25,17 +26,17 @@ export interface ProjectRow {
   sitemap_url:        string | null
   audit_urls:         string[]
   nav_urls:           string[]
-  results:            import('./types').PageAuditResult[]
-  lighthouse_results: import('./types').LighthouseResult[]
+  results:            PageAuditResult[]
+  lighthouse_results: LighthouseResult[]
 }
 
 // ─── Tipos — Hotel Intelligence Platform ─────────────────────────────────────
 
-export type Country  = 'mx' | 'us' | 'fr'
-export type Language = 'es' | 'en' | 'fr'
-export type AuditStatus = 'pending' | 'running' | 'completed' | 'failed'
-export type Severity = 'critical' | 'high' | 'low'
-export type DeltaImpact = 'positive' | 'negative' | 'neutral'
+export type Country       = 'mx' | 'us' | 'fr'
+export type Language      = 'es' | 'en' | 'fr'
+export type AuditStatus   = 'pending' | 'running' | 'completed' | 'failed'
+export type IssueSeverity = 'critical' | 'high' | 'low'   // hotel platform (distinto de lib/types.ts Severity)
+export type DeltaImpact   = 'positive' | 'negative' | 'neutral'
 export type Platform = 'booking' | 'expedia' | 'direct' | 'other'
 export type ReportType = 'market_analysis' | 'competitor_intel' | 'ota_strategy' | 'due_diligence' | 'content_strategy' | 'monthly_news'
 export type DeviceType = 'desktop' | 'mobile' | 'tablet'
@@ -83,7 +84,7 @@ export interface AuditIssue {
   audit_id:       string
   hotel_id:       string
   type:           string
-  severity:       Severity
+  severity:       IssueSeverity
   url:            string
   description:    string | null
   recommendation: string | null

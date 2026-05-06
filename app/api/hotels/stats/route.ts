@@ -2,9 +2,12 @@
 
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 
 export async function GET() {
   const supabase = createSupabaseServerClient()
+  const authErr = await requireAuth(supabase)
+  if (authErr) return authErr
 
   const [hotelsRes, auditsRes, issuesRes, deltasRes] = await Promise.all([
     // Hoteles activos

@@ -2,11 +2,14 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 
 type Ctx = { params: { id: string } }
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
   const supabase = createSupabaseServerClient()
+  const authErr = await requireAuth(supabase)
+  if (authErr) return authErr
   const { data, error } = await supabase
     .from('audits')
     .select('id, status, score, pages_crawled, issues_critical, issues_high, issues_low, triggered_by, started_at, completed_at, created_at')

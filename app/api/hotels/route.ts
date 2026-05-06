@@ -2,12 +2,15 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 import type { Hotel } from '@/lib/supabase'
 
 // ── GET — lista de hoteles ─────────────────────────────────────────────────────
 
 export async function GET() {
   const supabase = createSupabaseServerClient()
+  const authErr = await requireAuth(supabase)
+  if (authErr) return authErr
   const { data, error } = await supabase
     .from('hotels')
     .select('*')
@@ -32,6 +35,8 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = createSupabaseServerClient()
+  const authErr = await requireAuth(supabase)
+  if (authErr) return authErr
   const { data, error } = await supabase
     .from('hotels')
     .insert({ name, url, country, destination, language: language ?? 'es', gsc_property: gsc_property ?? null })

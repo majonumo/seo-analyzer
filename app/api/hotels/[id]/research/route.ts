@@ -2,12 +2,15 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 import type { ReportType } from '@/lib/supabase'
 
 type Ctx = { params: { id: string } }
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
   const supabase = createSupabaseServerClient()
+  const authErr = await requireAuth(supabase)
+  if (authErr) return authErr
   const { data, error } = await supabase
     .from('research_reports')
     .select('id, type, title, destination, created_at')
@@ -30,6 +33,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   }
 
   const supabase = createSupabaseServerClient()
+  const authErr = await requireAuth(supabase)
+  if (authErr) return authErr
   const { data, error } = await supabase
     .from('research_reports')
     .insert({ hotel_id: params.id, type, title, content, destination: destination ?? null })

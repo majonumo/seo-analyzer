@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 
 type Ctx = { params: { id: string } }
 
@@ -11,6 +12,8 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   const days = parseInt(searchParams.get('days') ?? '90')
 
   const supabase = createSupabaseServerClient()
+  const authErr = await requireAuth(supabase)
+  if (authErr) return authErr
   let query = supabase
     .from('keywords')
     .select('id, keyword, position, clicks, impressions, ctr, date, country, device')

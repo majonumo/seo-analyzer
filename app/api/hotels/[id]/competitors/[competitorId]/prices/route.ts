@@ -2,11 +2,14 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 
 type Ctx = { params: { id: string; competitorId: string } }
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
   const supabase = createSupabaseServerClient()
+  const authErr = await requireAuth(supabase)
+  if (authErr) return authErr
   const { data, error } = await supabase
     .from('competitor_prices')
     .select('*')
@@ -38,6 +41,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   }
 
   const supabase = createSupabaseServerClient()
+  const authErr = await requireAuth(supabase)
+  if (authErr) return authErr
   const { data, error } = await supabase
     .from('competitor_prices')
     .insert({

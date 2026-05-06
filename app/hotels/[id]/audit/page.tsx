@@ -39,34 +39,57 @@ const SEV_COLOR: Record<string, string>  = {
   low:      'text-zinc-400 bg-zinc-800 border-zinc-700',
 }
 
-// Mapa legible de tipos de issue
+// Tipos que pertenecen a Performance — se excluyen de la auditoría técnica SEO
+const PERF_TYPES = new Set([
+  'perf-html-size', 'perf-dom-size', 'perf-blocking-scripts',
+  'perf-images-alt', 'perf-images-dimensions', 'perf-inline-styles',
+  'perf-deprecated-tags', 'perf-viewport-meta', 'perf-favicon',
+  'blocking_scripts', 'large_html', 'large_dom', 'missing_viewport',
+])
+
+// Solo tipos de SEO técnico (lo que mostraría Semrush / Screaming Frog)
 const TYPE_LABELS: Record<string, string> = {
-  'seo-title-exists':       'Título faltante',
-  'seo-title-length':       'Título muy largo/corto',
-  'seo-desc-exists':        'Meta description faltante',
-  'seo-desc-length':        'Meta description muy larga/corta',
-  'seo-h1-exists':          'H1 faltante',
-  'seo-h1-unique':          'H1 duplicado',
-  'seo-h2-exists':          'H2 faltante',
-  'seo-canonical-exists':   'Canonical faltante',
-  'seo-canonical-self':     'Canonical incorrecto',
-  'seo-og-title':           'OG title faltante',
-  'seo-og-description':     'OG description faltante',
-  'seo-og-image':           'OG image faltante',
-  'seo-schema-exists':      'Structured data faltante',
-  'seo-robots-noindex':     'Página con noindex',
-  'perf-html-size':         'HTML muy grande',
-  'perf-dom-size':          'DOM muy grande',
-  'perf-blocking-scripts':  'Scripts bloqueantes',
-  'perf-images-alt':        'Imágenes sin alt',
-  'perf-images-dimensions': 'Imágenes sin dimensiones',
-  'perf-inline-styles':     'Estilos inline excesivos',
-  'perf-deprecated-tags':   'Tags HTML obsoletos',
-  'perf-viewport-meta':     'Viewport meta faltante',
-  'perf-favicon':           'Favicon faltante',
-  'hreflang_wrong_code':    'Hreflang: código inválido',
-  'hreflang_no_xdefault':   'Hreflang: falta x-default',
-  'hreflang_missing':       'Hreflang no configurado',
+  // On-page SEO
+  'seo-title-exists':        'Título faltante',
+  'seo-title-length':        'Título muy largo o corto',
+  'seo-title-duplicate':     'Título duplicado',
+  'seo-desc-exists':         'Meta description faltante',
+  'seo-desc-length':         'Meta description muy larga o corta',
+  'seo-desc-duplicate':      'Meta description duplicada',
+  'seo-h1-exists':           'H1 faltante',
+  'seo-h1-unique':           'H1 duplicado en la página',
+  'seo-h2-exists':           'H2 faltante',
+  'seo-canonical-exists':    'Canonical faltante',
+  'seo-canonical-self':      'Canonical apunta a URL incorrecta',
+  'seo-robots-noindex':      'Página indexada con noindex',
+  // Open Graph / redes sociales
+  'seo-og-title':            'OG title faltante',
+  'seo-og-description':      'OG description faltante',
+  'seo-og-image':            'OG image faltante',
+  // Datos estructurados
+  'seo-schema-exists':       'Structured data (Schema.org) faltante',
+  // Internacionalización (crítico para MX/US/FR)
+  'hreflang_missing':        'Hreflang no configurado',
+  'hreflang_no_xdefault':    'Hreflang: falta x-default',
+  'hreflang_not_bidirectional': 'Hreflang: no bidireccional',
+  'hreflang_wrong_code':     'Hreflang: código BCP-47 inválido',
+  // Sitemap
+  'sitemap_found':           'Sitemap no encontrado',
+  'sitemap_valid_xml':       'Sitemap con XML inválido',
+  'sitemap_has_urls':        'Sitemap sin URLs',
+  'sitemap_lastmod':         'Sitemap sin fechas lastmod',
+  'sitemap_priority':        'Sitemap sin prioridades',
+  'sitemap_warnings':        'Sitemap con advertencias',
+  // Links
+  'broken_link':             'Link roto (404/5xx)',
+  'redirect_chain':          'Cadena de redirecciones',
+  'redirect_loop':           'Loop de redirección',
+  'orphan_page':             'Página huérfana (sin links internos)',
+  // Contenido
+  'duplicate_content':       'Contenido duplicado',
+  'thin_content':            'Contenido escaso (thin content)',
+  'missing_alt':             'Imágenes sin atributo alt',
+  'missing_img_dimensions':  'Imágenes sin dimensiones declaradas',
 }
 
 // ─── Score gauge ──────────────────────────────────────────────────────────────
@@ -379,9 +402,10 @@ export default function HotelAuditPage({ params }: { params: { id: string } }) {
     }
   }, [hotelUrl, id])
 
-  // ── Filtered issues ──────────────────────────────────────────────────────
-  const allTypes = Array.from(new Set(issues.map(i => i.type))).sort()
-  const filtered = issues.filter(i => {
+  // ── Filtered issues — excluir tipos de performance (van a la pestaña Performance) ──
+  const seoIssues = issues.filter(i => !PERF_TYPES.has(i.type) && !i.type.startsWith('perf-'))
+  const allTypes  = Array.from(new Set(seoIssues.map(i => i.type))).sort()
+  const filtered  = seoIssues.filter(i => {
     if (sevFilter !== 'all' && i.severity !== sevFilter) return false
     if (fixFilter === 'pending' && i.fixed) return false
     if (fixFilter === 'fixed' && !i.fixed) return false
@@ -389,10 +413,10 @@ export default function HotelAuditPage({ params }: { params: { id: string } }) {
     return true
   })
 
-  const critCount = issues.filter(i => i.severity === 'critical' && !i.fixed).length
-  const highCount = issues.filter(i => i.severity === 'high' && !i.fixed).length
-  const lowCount  = issues.filter(i => i.severity === 'low' && !i.fixed).length
-  const fixedCount = issues.filter(i => i.fixed).length
+  const critCount  = seoIssues.filter(i => i.severity === 'critical' && !i.fixed).length
+  const highCount  = seoIssues.filter(i => i.severity === 'high' && !i.fixed).length
+  const lowCount   = seoIssues.filter(i => i.severity === 'low' && !i.fixed).length
+  const fixedCount = seoIssues.filter(i => i.fixed).length
 
   const isRunning = ['fetching-urls', 'crawling', 'saving'].includes(runState)
   const pct = progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0

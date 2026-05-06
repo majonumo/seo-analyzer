@@ -2,12 +2,12 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 import { syncGSCKeywords } from '@/lib/gsc/client'
 
 type Ctx = { params: { id: string } }
 
 export async function POST(req: NextRequest, { params }: Ctx) {
-  // Verificar credenciales GSC
   if (!process.env.GOOGLE_GSC_CLIENT_EMAIL || !process.env.GOOGLE_GSC_PRIVATE_KEY) {
     return NextResponse.json({
       error: 'GSC no configurado',
@@ -15,8 +15,9 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     }, { status: 400 })
   }
 
-  // Obtener gsc_property del hotel
   const supabase = createSupabaseServerClient()
+  const authErr = await requireAuth(supabase)
+  if (authErr) return authErr
   const { data: hotel, error: hErr } = await supabase
     .from('hotels')
     .select('gsc_property, name')

@@ -1,0 +1,1 @@
+export { HotelTabNav } from './HotelTabNav'

@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { requireAuth } from '@/lib/api-auth'
 import type { ReportType } from '@/lib/supabase'
 
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent'
@@ -213,6 +214,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
   // Obtener datos del hotel
   const supabase = createSupabaseServerClient()
+  const authErr = await requireAuth(supabase)
+  if (authErr) return authErr
   const { data: hotel } = await supabase
     .from('hotels')
     .select('name, url, country, destination, language')

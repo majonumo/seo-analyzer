@@ -83,8 +83,8 @@ function parseLhr(lhr: Record<string, unknown>): LighthouseStrategyData {
       speedIndex: getMetric('speed-index'),
       tti:        getMetric('interactive'),
     },
-    opportunities: opportunities.slice(0, 10),
-    diagnostics:   diagnostics.slice(0, 10),
+    opportunities,   // sin límite — la UI filtra y agrupa
+    diagnostics,
   }
 }
 
