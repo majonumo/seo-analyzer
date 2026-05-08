@@ -3,7 +3,7 @@
 // POST: busca precios en Google Hotels via SerpAPI y guarda en competitor_prices
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 
 export const maxDuration = 30
@@ -13,7 +13,7 @@ type Ctx = { params: { id: string } }
 // ── GET — reconstruir último scan desde competitor_prices ─────────────────────
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
 
@@ -109,7 +109,7 @@ export interface GoogleHotelsResult {
 }
 
 export async function POST(req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
 

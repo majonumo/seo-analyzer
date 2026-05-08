@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(vercel whoami *)",
+      "Bash(cat .vercel/project.json)"
+    ]
+  }
+}

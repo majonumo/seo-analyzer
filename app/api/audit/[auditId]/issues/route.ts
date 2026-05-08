@@ -1,12 +1,12 @@
 // app/api/audit/[auditId]/issues/route.ts — GET: lista de issues de una auditoría
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 
 type Ctx = { params: { auditId: string } }
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const { data, error } = await supabase
     .from('issues')
     .select('id, type, severity, url, description, recommendation, current_value, fixed, fixed_at, created_at')

@@ -133,7 +133,8 @@ async function getInterest(widget: Widget, cookie: string): Promise<TrendPoint[]
     throw new Error(`Multiline parse error: ${(e as Error).message}`)
   }
 
-  const raw = (data?.default?.timelineData ?? []) as Array<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw = ((data as any)?.default?.timelineData ?? []) as Array<{
     formattedTime?: string
     formattedAxisTime?: string
     value?: number[]

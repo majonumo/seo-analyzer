@@ -2,7 +2,7 @@
 // POST: recibe los resultados del crawl, guarda issues, calcula score y deltas
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 
 type Ctx = { params: { auditId: string } }
 
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
   const { hotelId, pageResults, hreflangIssues, mainUrl } = body
   const auditId = params.auditId
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
 
   // ── 1. Construir lista de issues ───────────────────────────────────────────
   const issuesToInsert: {

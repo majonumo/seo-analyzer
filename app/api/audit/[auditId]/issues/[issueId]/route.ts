@@ -1,7 +1,7 @@
 // app/api/audit/[auditId]/issues/[issueId]/route.ts — PATCH: toggle fixed status
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 
 type Ctx = { params: { auditId: string; issueId: string } }
 
@@ -11,7 +11,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
   }
 
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const { data, error } = await supabase
     .from('issues')
     .update({

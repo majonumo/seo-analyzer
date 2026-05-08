@@ -1,13 +1,13 @@
 // app/api/hotels/[id]/research/[reportId]/route.ts — GET/DELETE reporte individual
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 
 type Ctx = { params: { id: string; reportId: string } }
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const { data, error } = await supabase
@@ -22,7 +22,7 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
 }
 
 export async function DELETE(_req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const { error } = await supabase

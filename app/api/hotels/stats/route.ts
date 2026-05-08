@@ -1,11 +1,11 @@
 // app/api/hotels/stats/route.ts — GET: métricas globales del dashboard
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 
 export async function GET() {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
 

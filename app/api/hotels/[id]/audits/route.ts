@@ -1,13 +1,13 @@
 // app/api/hotels/[id]/audits/route.ts — historial de auditorías de un hotel
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 
 type Ctx = { params: { id: string } }
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const { data, error } = await supabase

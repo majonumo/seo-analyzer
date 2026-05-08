@@ -3,7 +3,7 @@
 // POST — corre PageSpeed Insights (mobile + desktop), guarda ambos en DB
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 import { analyzeLighthouse } from '@/lib/analyzers/lighthouse'
 
@@ -14,7 +14,7 @@ type Ctx = { params: { id: string } }
 // ── GET ───────────────────────────────────────────────────────────────────────
 
 export async function GET(req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const strategy = req.nextUrl.searchParams.get('strategy') ?? 'mobile'
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
 // ── POST ──────────────────────────────────────────────────────────────────────
 
 export async function POST(_req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
 

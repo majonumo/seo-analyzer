@@ -1,10 +1,10 @@
 // app/api/reports/route.ts — GET: todos los deltas de todos los hoteles
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 
 export async function GET() {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const { data, error } = await supabase
     .from('deltas')
     .select('id, type, description, previous_value, current_value, impact, created_at, hotel_id, hotels(name, country)')

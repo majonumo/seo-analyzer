@@ -2,7 +2,7 @@
 // POST: genera un reporte de investigación con Gemini AI
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 import type { ReportType } from '@/lib/supabase'
 
@@ -213,7 +213,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   const { type, destination, extraContext } = body
 
   // Obtener datos del hotel
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const { data: hotel } = await supabase

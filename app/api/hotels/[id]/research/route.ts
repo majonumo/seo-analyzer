@@ -1,14 +1,14 @@
 // app/api/hotels/[id]/research/route.ts — GET/POST reportes de investigación
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 import type { ReportType } from '@/lib/supabase'
 
 type Ctx = { params: { id: string } }
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const { data, error } = await supabase
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     return NextResponse.json({ error: 'Faltan campos: type, title, content' }, { status: 400 })
   }
 
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const { data, error } = await supabase

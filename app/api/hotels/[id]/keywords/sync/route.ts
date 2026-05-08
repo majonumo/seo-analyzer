@@ -1,7 +1,7 @@
 // app/api/hotels/[id]/keywords/sync/route.ts — POST: sincroniza keywords desde GSC
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 import { syncGSCKeywords } from '@/lib/gsc/client'
 
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     }, { status: 400 })
   }
 
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const { data: hotel, error: hErr } = await supabase

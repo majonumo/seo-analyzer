@@ -3,7 +3,7 @@
 // Estrategia: fetch con headers reales → parseo de precios en HTML → guardar en DB
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 
 export const maxDuration = 55
@@ -132,7 +132,7 @@ async function scrapePrice(url: string): Promise<{ price: number; currency: stri
 }
 
 export async function POST(_req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
 

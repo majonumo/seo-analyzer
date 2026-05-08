@@ -1,7 +1,7 @@
 // app/api/audit/start/route.ts — POST: crea registro de auditoría en Supabase
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 
 export async function POST(req: NextRequest) {
   let body: { hotelId: string }
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   const { hotelId } = body
   if (!hotelId) return NextResponse.json({ error: 'hotelId requerido' }, { status: 400 })
 
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const { data, error } = await supabase
     .from('audits')
     .insert({

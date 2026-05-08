@@ -3,7 +3,7 @@
 // POST → genera seeds automáticos por nicho/destino, fetcha Google Trends, cruza con GSC
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 import { fetchTrends } from '@/lib/google-trends'
 
@@ -99,7 +99,7 @@ function buildQuickWins(
 // ── DELETE — eliminar un trend por id ────────────────────────────────────────
 
 export async function DELETE(req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const id = req.nextUrl.searchParams.get('id')
@@ -119,7 +119,7 @@ export async function DELETE(req: NextRequest, { params }: Ctx) {
 // ── GET ───────────────────────────────────────────────────────────────────────
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const month = currentMonth()
@@ -157,7 +157,7 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
 // ── POST ──────────────────────────────────────────────────────────────────────
 
 export async function POST(_req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
 

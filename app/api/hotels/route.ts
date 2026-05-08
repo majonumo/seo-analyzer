@@ -1,14 +1,14 @@
 // app/api/hotels/route.ts — GET (lista) + POST (crear hotel)
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 import type { Hotel } from '@/lib/supabase'
 
 // ── GET — lista de hoteles ─────────────────────────────────────────────────────
 
 export async function GET() {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const { data, error } = await supabase
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Faltan campos requeridos: name, url, country, destination' }, { status: 400 })
   }
 
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const { data, error } = await supabase

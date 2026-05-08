@@ -1,7 +1,7 @@
 // app/api/hotels/[id]/route.ts — GET + PUT + DELETE individual hotel
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 
 type Ctx = { params: { id: string } }
@@ -9,7 +9,7 @@ type Ctx = { params: { id: string } }
 // ── GET — detalle del hotel con último audit ───────────────────────────────────
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const { data: hotel, error } = await supabase
@@ -41,7 +41,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     return NextResponse.json({ error: 'Body inválido' }, { status: 400 })
   }
 
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const { data, error } = await supabase
@@ -58,7 +58,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
 // ── DELETE — eliminar hotel ────────────────────────────────────────────────────
 
 export async function DELETE(_req: NextRequest, { params }: Ctx) {
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   const { error } = await supabase.from('hotels').delete().eq('id', params.id)

@@ -1,7 +1,7 @@
 // app/api/hotels/[id]/keywords/route.ts — GET keywords (con filtros)
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { requireAuth } from '@/lib/api-auth'
 
 type Ctx = { params: { id: string } }
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, { params }: Ctx) {
   const mode = searchParams.get('mode') // 'quickwins' | 'top' | null (all)
   const days = parseInt(searchParams.get('days') ?? '90')
 
-  const supabase = createSupabaseServerClient()
+  const supabase = createSupabaseAdminClient()
   const authErr = await requireAuth(supabase)
   if (authErr) return authErr
   let query = supabase
